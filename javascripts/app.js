@@ -11,11 +11,11 @@ d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json",
     svg.select('svg g.chart').attr("transform", "translate(" + (t[0] + offset.x) + ',' + (t[1] + offset.y) + ")" + " scale(" + d3.event.scale + ")")
   }));
 
-  var xAxis = 20;  // "female-maturity-(days)"
-  var yAxis = 18; // "adult-weight-(g)"
-  var name = 8; // "common-name"
+  var xAxis = 20;  // maximum-longevity-(yrs)
+  var yAxis = 18; // adult-weight-(g)
+  var name = 8; // common-name
 
-  data.data = filter_data(data.data);
+  data = filter_data(data);
 
   var bounds = getBounds(data.data, 1);
 
@@ -161,9 +161,22 @@ d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json",
   }
 
   function filter_data(data) {
-    return _.filter(data, function(d) {
+    data.data = _.filter(data.data, function(d) {
       return d[xAxis].length > 0 && d[yAxis].length > 0 ? true : false;
     });
+    // Convert g to kg
+    data.fields = _.map(data.fields, function(f) {
+      if (f === 'adult-weight-(g)') {
+        return 'adult-weight-(kg)'
+      } else {
+        return f;
+      }
+    });
+    data.data = _.map(data.data, function(d){
+      d[yAxis] = parseInt(d[yAxis], 10)/1000;
+      return d;
+    });
+    return data;
   }
 });
 
