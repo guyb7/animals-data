@@ -102,9 +102,6 @@ img {
 }
 
 header {
-  width:270px;
-  float:left;
-  position:fixed;
   -webkit-font-smoothing:subpixel-antialiased;
 }
 
@@ -168,8 +165,6 @@ header ul a strong {
 }
 
 section {
-  width:500px;
-  float:right;
   padding-bottom:50px;
 }
 
@@ -269,4 +264,36 @@ footer {
 
 #app {
   margin-bottom: 40px;
+}
+#animalName {
+  font-size: 20px;
+  font-weight: bold;
+}
+#animalY {
+  margin-bottom: 10px;
+}
+svg {
+  background-color: #f9f9f9;
+  cursor: move;
+}
+/* SVG styling */
+path {
+  fill: #CED8B6;
+}
+line {
+  stroke: #555;
+  stroke-width: 2px;
+}
+line#bestfit {
+  stroke: #ddd;
+  stroke-width: 4px;
+}
+#xAxis path, #yAxis path, #xAxis line, #yAxis line {
+  stroke: #ccc;
+  fill: none;
+  shape-rendering: crispEdges;
+}
+text {
+  font-size: 12px;
+  fill: #888;
 }
