@@ -10,6 +10,8 @@ d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json",
     var t = d3.event.translate;
     svg.select('svg g.chart').attr("transform", "translate(" + (t[0] + offset.x) + ',' + (t[1] + offset.y) + ")" + " scale(" + d3.event.scale + ")")
   }));
+  svg.on("click", null);
+  svg.on("dblclick.zoom", null);
 
   var xAxis = 20;  // maximum-longevity-(yrs)
   var yAxis = 18; // adult-weight-(g)
