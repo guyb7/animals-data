@@ -1,4 +1,4 @@
-d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json", function(error, data) {
+d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json", function(error, raw_data) {
   var svg = d3.select("#app")
     .append("svg")
     .attr("width", 900)
@@ -16,8 +16,9 @@ d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json",
   var xAxis = 20;  // maximum-longevity-(yrs)
   var yAxis = 18; // adult-weight-(g)
   var name = 8; // common-name
+  var species = 7; // species
 
-  data = filter_data(data);
+  var data = filter_data(raw_data);
 
   var bounds = getBounds(data.data, 1);
 
@@ -61,7 +62,7 @@ d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json",
     .attr('fill', function(d, i) {return pointColour(i);})
     .style('cursor', 'pointer')
     .on('click', function(d) {
-      window.open('http://genomics.senescence.info/species/entry.php?id=' + d[0], '_blank');
+      window.open('http://images.google.com/images?q=' + d[species].replace(/\s/, '+'), '_blank');
     })
     .on('mouseover', function(d) {
       document.getElementById('animalName').innerHTML = d[name];
