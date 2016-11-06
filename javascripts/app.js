@@ -13,14 +13,16 @@ d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json",
   svg.on("click", null);
   svg.on("dblclick.zoom", null);
 
-  var xAxis = 20;  // maximum-longevity-(yrs)
-  var yAxis = 18; // adult-weight-(g)
-  var name = 8; // common-name
+  var phylum = 2; // phylum
+  var animal_class = 3; // class
   var species = 7; // species
+  var name = 8; // common-name
+  var yAxis = 18; // adult-weight-(g)
+  var xAxis = 20;  // maximum-longevity-(yrs)
 
-  var data = filter_data(raw_data);
-
-  var bounds = getBounds(data.data, 1);
+  var processed_data = process_data(raw_data);
+  var data = _.clone(processed_data);
+  init_filters(processed_data, data);
 
   var xScale, yScale;
 
@@ -41,58 +43,68 @@ d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json",
 
   d3.select('svg g.chart')
     .append('text')
-    .attr('transform', 'translate(-90, 330)rotate(-90)')
+    .attr('transform', 'translate(-70, 330)rotate(-90)')
     .attr({'id': 'yLabel', 'text-anchor': 'middle'})
     .text(data.fields[yAxis]);
 
   // Render points
-  updateScales();
-  var pointColour = d3.scale.category20b();
-  d3.select('svg g.chart')
-    .selectAll('circle')
-    .data(data.data)
-    .enter()
-    .append('circle')
-    .attr('cx', function(d) {
-      return xScale(parseFloat(d[xAxis]));
-    })
-    .attr('cy', function(d) {
-      return yScale(parseFloat(d[yAxis]));
-    })
-    .attr('fill', function(d, i) {return pointColour(i);})
-    .style('cursor', 'pointer')
-    .on('click', function(d) {
-      window.open('http://images.google.com/images?q=' + d[species].replace(/\s/, '+'), '_blank');
-    })
-    .on('mouseover', function(d) {
-      document.getElementById('animalName').innerHTML = d[name];
-      document.getElementById('animalX').innerHTML = data.fields[xAxis] + ': ' + d[xAxis];
-      document.getElementById('animalY').innerHTML = data.fields[yAxis] + ': ' + d[yAxis];
-    })
-    .on('mouseout', function(d) {
-      document.getElementById('animalName').innerHTML = '&nbsp;';
-      document.getElementById('animalX').innerHTML = '&nbsp;';
-      document.getElementById('animalY').innerHTML = '&nbsp;';
-    });
+  updateScales(data);
 
-  updateChart(true);
+  var render = function(data){
+    var pointColour = d3.scale.category20b();
+    var circles = d3.select('svg g.chart')
+      .selectAll('circle')
+      .data(data.data);
+    circles.enter()
+      .append('circle')
+      .attr('cx', function(d) {
+        return xScale(parseFloat(d[xAxis]));
+      })
+      .attr('cy', function(d) {
+        return yScale(parseFloat(d[yAxis]));
+      })
+      .attr('fill', function(d, i) {return pointColour(i);})
+      .style('cursor', 'pointer')
+      .on('click', function(d) {
+        window.open('http://images.google.com/images?q=' + d[species].replace(/\s/, '+'), '_blank');
+      })
+      .on('mouseover', function(d) {
+        document.getElementById('animalName').innerHTML = d[name];
+        document.getElementById('animalX').innerHTML = d[xAxis];
+        document.getElementById('animalY').innerHTML = d[yAxis];
+      });
+    circles.exit().remove();
+  };
 
-    // Render axes
+  render(data);
+  updateChart(data);
+
+
+  //// RENDERING FUNCTIONS
+  function updateChart(data) {
+    updateScales(data);
+
+  // Render axes
+  var xa = document.getElementById('xAxis');
+  if (xa) {
+    xa.outerHTML = "";
+    delete xa;
+  }
+  var ya = document.getElementById('yAxis');
+  if (ya) {
+    ya.outerHTML = "";
+    delete ya;
+  }
   d3.select('svg g.chart')
     .append("g")
     .attr('transform', 'translate(0, 630)')
     .attr('id', 'xAxis')
     .call(makeXAxis);
-
   d3.select('svg g.chart')
     .append("g")
     .attr('id', 'yAxis')
     .attr('transform', 'translate(-10, 0)')
     .call(makeYAxis);
-
-  //// RENDERING FUNCTIONS
-  function updateChart(init) {
-    updateScales();
 
     d3.select('svg g.chart')
       .selectAll('circle')
@@ -120,7 +132,8 @@ d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json",
       .attr({'x1': xScale(x1), 'y1': yScale(y1), 'x2': xScale(x2), 'y2': yScale(y2)});
   }
 
-  function updateScales() {
+  function updateScales(data) {
+    var bounds = getBounds(data.data, 1);
     xScale = d3.scale.linear()
                     .domain([bounds[xAxis].min, bounds[xAxis].max])
                     .range([20, 780]);
@@ -147,6 +160,7 @@ d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json",
       });
       b[k].max > 0 ? b[k].max *= paddingFactor : b[k].max /= paddingFactor;
       b[k].min > 0 ? b[k].min /= paddingFactor : b[k].min *= paddingFactor;
+      b[k].max = Math.min(b[k].max, 1000);
     });
     return b;
   }
@@ -163,10 +177,12 @@ d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json",
       .orient("left"));
   }
 
-  function filter_data(data) {
+  function process_data(original_data) {
+    var data = _.clone(original_data);
     data.data = _.filter(data.data, function(d) {
       return d[xAxis].length > 0 && d[yAxis].length > 0 ? true : false;
     });
+
     // Convert g to kg
     data.fields = _.map(data.fields, function(f) {
       if (f === 'adult-weight-(g)') {
@@ -176,10 +192,39 @@ d3.json("https://raw.githubusercontent.com/guyb7/animals-data/master/data.json",
       }
     });
     data.data = _.map(data.data, function(d){
-      d[yAxis] = parseInt(d[yAxis], 10)/1000;
+      d[yAxis] = Number(d[yAxis], 10)/1000;
       return d;
     });
     return data;
+  }
+
+  function filter_data(original_data) {
+    var data = _.clone(original_data);
+    // Species filter
+    var selected_species = getSelectValues(document.getElementById('filter_species'));
+    if (selected_species.length > 0) {
+      data.data = _.filter(data.data, function(d) {
+        return _.indexOf(selected_species, d[animal_class]) > -1;
+      });
+    }
+    return data;
+  }
+
+  function init_filters(raw_data, data) {
+    var html = '';
+    var species_types = {};
+    _.each(raw_data.data, function(d){
+      species_types[d[animal_class]] = (d[phylum] == 'Chordata');
+    });
+    _.each(species_types, function(v,k){
+      html += '<option value="' + k + '" ' + (v ? 'selected' : '') + '>' + k + '</option>';
+    });
+    document.getElementById('filter_species').innerHTML = html;
+    document.getElementById('update_data').addEventListener('click', function(){
+      data = filter_data(raw_data);
+      render(data);
+      updateChart(data);
+    });
   }
 });
 
@@ -210,4 +255,19 @@ function getCorrelation(xArray, yArray) {
   var m = ntor / dtorX; // y = mx + b
   var b = ( sumY - m * sumX ) / n;
   return {r: r, m: m, b: b};
+}
+
+function getSelectValues(select) {
+  var result = [];
+  var options = select && select.options;
+  var opt;
+
+  for (var i=0, iLen=options.length; i<iLen; i++) {
+    opt = options[i];
+
+    if (opt.selected) {
+      result.push(opt.value || opt.text);
+    }
+  }
+  return result;
 }

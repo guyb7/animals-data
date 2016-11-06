@@ -18,11 +18,20 @@
         <h1>Animals life-span vs size</h1>
         <p class="view"><a href="https://github.com/guyb7/animals-data">View the Project on GitHub <small>guyb7/animals-data</small></a></p>
       </header>
+      <h3>Filters</h3>
+      <div>
+        Species
+        <select id="filter_species" multiple="multiple">
+        </select>
+      </div>
+      <button id="update_data">Update</button>
       <section>
         <div id="app">
-          <div id="animalName">&nbsp;</div>
-          <div id="animalX">&nbsp;</div>
-          <div id="animalY">&nbsp;</div>
+          <div id="animalInfo">
+            <div>Name: <span id="animalName">&nbsp;</span></div>
+            <div>Life span (years): <span id="animalX">&nbsp;</span></div>
+            <div>Weight (kg): <span id="animalY">&nbsp;</span></div>
+          </div>
         </div>
         <h3>Data source</h3>
         <p>

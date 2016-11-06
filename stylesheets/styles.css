@@ -265,14 +265,12 @@ footer {
 #app {
   margin-bottom: 40px;
 }
-#animalName {
-  font-size: 20px;
+#animalName, #animalX, #animalY {
+  font-size: 16px;
   font-weight: bold;
 }
-#animalY {
-  margin-bottom: 10px;
-}
 svg {
+  margin-top: 10px;
   background-color: #f9f9f9;
   cursor: move;
 }
